@@ -3,6 +3,10 @@
 import random
 import tkinter as tk
 
+gradient_steps = 10
+window_width = 500
+window_height = 100
+
 def _rgb_to_hex(rgb):
     t = tuple(rgb)
     return "#%0.2X%0.2X%0.2X" % t
@@ -20,40 +24,61 @@ def make_gradient(color1, color2, steps):
     colors.append(color2)
     return colors
 
-# https://stackoverflow.com/a/38256215
+class CozzleApp(tk.Frame):
+    def __init__(self, parent, *args, **kwargs):
+        tk.Frame.__init__(self, parent, *args, **kwargs)
+        self.parent = parent
+
+        start_color = _random_rgb()
+        end_color = _random_rgb()
+        g = make_gradient(start_color,end_color,gradient_steps)
+        self.ordered_pieces = []
+        self.canvas = tk.Canvas(self, width=window_width, height=window_height)
+        self.selected_for_move = None
+
+        for s in range(gradient_steps):
+            col = _rgb_to_hex(g[s])
+
+            # make items movable except the first and the last
+            tag = 'movable'
+            if s == 0 or s == gradient_steps-1:
+                tag = 'fixed'
+
+            tags = (tag, 'color_piece')
+            r_id = self.canvas.create_rectangle(s*window_width/gradient_steps, 0, (s+1)*window_width/gradient_steps, window_height, outline=col, fill=col, tags=tags)
+
+            # store pieces ids in order
+            self.ordered_pieces.append(r_id)
+
+        # def on click : addTag selected or swap with already selected piece
+        self.canvas.bind("<ButtonPress-1>", self.on_click)
+
+        self.canvas.pack()
+
+
+    # https://stackoverflow.com/a/38256215
+    def on_click(self, event):
+        r_id = self.canvas.find_closest(event.x, event.y)[0] # returns a tuple of length 1 so get the first element
+        if "fixed" in self.canvas.gettags(r_id):
+            return
+        col = self.canvas.itemcget(r_id, "fill")
+        if self.selected_for_move is None:
+            self.selected_for_move = (r_id, col)
+        else:
+            # swap items
+            (r_id1,col1) = self.selected_for_move
+            self.canvas.itemconfigure(r_id, fill=col1, outline=col1)
+            self.canvas.itemconfigure(r_id1, fill=col, outline=col)
+            self.selected_for_move = None
+
 
 def main():
-    gradient_steps = 10
-    window_width = 500
-    window_height = 100
 
     window = tk.Tk()
+    CozzleApp(window).pack()
 
-    start_color = _random_rgb()
-    end_color = _random_rgb()
-    g = make_gradient(start_color,end_color,gradient_steps)
-    ordered_pieces = []
 
-    canvas = tk.Canvas(window, width=window_width, height=window_height)
-    canvas.pack()
-
-    for s in range(gradient_steps):
-        col = _rgb_to_hex(g[s])
-
-        # make items movable except the first and the last
-        tag = 'movable'
-        if s == 0 or s == gradient_steps-1:
-            tag = 'fixed'
-
-        tags = (tag, 'color_piece')
-        r_id = canvas.create_rectangle(s*window_width/gradient_steps, 0, (s+1)*window_width/gradient_steps, window_height, outline=col, fill=col, tags=tags)
-
-        # store pieces ids in order
-        ordered_pieces.append(r_id)
-
-    # def on click : addTag selected or swap with already selected piece
-
-    tk.mainloop()
+    window.mainloop()
 
 if __name__=='__main__':
     main()
