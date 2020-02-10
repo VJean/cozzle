@@ -27,17 +27,31 @@ def main():
     window_width = 500
     window_height = 100
 
+    window = tk.Tk()
+
     start_color = _random_rgb()
     end_color = _random_rgb()
     g = make_gradient(start_color,end_color,gradient_steps)
+    ordered_pieces = []
 
-    master = tk.Tk()
-    w = tk.Canvas(master, width=window_width, height=window_height)
-    w.pack()
+    canvas = tk.Canvas(window, width=window_width, height=window_height)
+    canvas.pack()
 
     for s in range(gradient_steps):
         col = _rgb_to_hex(g[s])
-        w.create_rectangle(s*window_width/gradient_steps, 0, (s+1)*window_width/gradient_steps, window_height, outline=col, fill=col)
+
+        # make items movable except the first and the last
+        tag = 'movable'
+        if s == 0 or s == gradient_steps-1:
+            tag = 'fixed'
+
+        tags = (tag, 'color_piece')
+        r_id = canvas.create_rectangle(s*window_width/gradient_steps, 0, (s+1)*window_width/gradient_steps, window_height, outline=col, fill=col, tags=tags)
+
+        # store pieces ids in order
+        ordered_pieces.append(r_id)
+
+    # def on click : addTag selected or swap with already selected piece
 
     tk.mainloop()
 
