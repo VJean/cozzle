@@ -54,14 +54,13 @@ class CozzleApp(tk.Frame):
             # store pieces ids in order
             self.ordered_pieces.append(r_id)
 
-        # def on click : addTag selected or swap with already selected piece
-        self.canvas.bind("<ButtonPress-1>", self.on_click)
+        self.canvas.bind("<ButtonPress-1>", self.select_and_swap)
 
         self.canvas.pack()
 
 
     # https://stackoverflow.com/a/38256215
-    def on_click(self, event):
+    def select_and_swap(self, event):
         r_id = self.canvas.find_closest(event.x, event.y)[0] # returns a tuple of length 1 so get the first element
         if "fixed" in self.canvas.gettags(r_id):
             return
