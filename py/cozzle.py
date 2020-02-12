@@ -7,6 +7,12 @@ gradient_steps = 10
 window_width = 500
 window_height = 100
 
+def _hex_to_rgb(hex):
+    h = hex.lstrip('#')
+    if len(h) != 6:
+        raise ValueError("hex value should be a 6 characters string, but got : %s" % hex)
+    return tuple(int(h[i:i+2], 16) for i in (0,2,4))
+
 def _rgb_to_hex(rgb):
     t = tuple(rgb)
     return "#%0.2X%0.2X%0.2X" % t
