@@ -23,11 +23,11 @@ def _random_rgb():
 def make_gradient(color1, color2, steps):
     if steps < 2:
         return None
-    colors = [color1]
+    colors = [_rgb_to_hex(color1)]
     for n in range(1,steps-1):
         color = [int(color1[i] + (n/steps)*(color2[i]-color1[i])) for i in range(3)]
-        colors.append(color)
-    colors.append(color2)
+        colors.append(_rgb_to_hex(color))
+    colors.append(_rgb_to_hex(color2))
     return colors
 
 class CozzleApp(tk.Frame):
@@ -35,15 +35,13 @@ class CozzleApp(tk.Frame):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
 
-        start_color = _random_rgb()
-        end_color = _random_rgb()
-        g = make_gradient(start_color,end_color,gradient_steps)
+        g = make_gradient(_random_rgb(),_random_rgb(),gradient_steps)
         self.ordered_pieces = []
         self.canvas = tk.Canvas(self, width=window_width, height=window_height)
         self.selected_for_move = None
 
         for s in range(gradient_steps):
-            col = _rgb_to_hex(g[s])
+            col = g[s]
 
             # make items movable except the first and the last
             tag = 'movable'
