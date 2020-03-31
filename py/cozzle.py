@@ -35,29 +35,39 @@ class CozzleApp(tk.Frame):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
 
-        g = make_gradient(_random_rgb(),_random_rgb(),gradient_steps)
         self.ordered_pieces = []
         self.canvas = tk.Canvas(self, width=window_width, height=window_height)
         self.selected_for_move = None
 
+        self.reset()
+
+        self.canvas.bind("<ButtonPress-1>", self.select_and_swap)
+        self.bind("<KeyPress-r>", self.renew_gradient)
+
+        # Give focus to the frame (self) to receive Keyboard events
+        self.focus_set()
+        self.canvas.pack()
+
+    def reset(self):
+        g = make_gradient(_random_rgb(), _random_rgb(), gradient_steps)
+        # clear canvas
+        self.canvas.delete("all")
+        # draw pieces on canvas with colors from g, the generated gradient
         for s in range(gradient_steps):
             col = g[s]
 
             # make items movable except the first and the last
             tag = 'movable'
-            if s == 0 or s == gradient_steps-1:
+            if s == 0 or s == gradient_steps - 1:
                 tag = 'fixed'
 
             tags = (tag, 'color_piece')
-            r_id = self.canvas.create_rectangle(s*window_width/gradient_steps, 0, (s+1)*window_width/gradient_steps, window_height, outline=col, fill=col, tags=tags)
+            r_id = self.canvas.create_rectangle(s * window_width / gradient_steps, 0,
+                                                (s + 1) * window_width / gradient_steps, window_height, outline=col,
+                                                fill=col, tags=tags)
 
             # store pieces ids in order
             self.ordered_pieces.append(r_id)
-
-        self.canvas.bind("<ButtonPress-1>", self.select_and_swap)
-
-        self.canvas.pack()
-
 
     # https://stackoverflow.com/a/38256215
     def select_and_swap(self, event):
@@ -74,6 +84,9 @@ class CozzleApp(tk.Frame):
             self.canvas.itemconfigure(r_id1, fill=col, outline=col)
             self.selected_for_move = None
 
+    def renew_gradient(self, event):
+        print("Drawing a new gradient")
+        self.reset()
 
 def main():
 
