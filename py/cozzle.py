@@ -8,26 +8,43 @@ window_width = 500
 window_height = 100
 
 def _hex_to_rgb(hex):
+    """
+    Convert a color from hexadecimal format to rgb format
+    :param hex: a hexadecimal string ( "#XXXXXX" )
+    :return: a tuple of rgb components ( (r,g,b) )
+    """
     h = hex.lstrip('#')
     if len(h) != 6:
         raise ValueError("hex value should be a 6 characters string, but got : %s" % hex)
     return tuple(int(h[i:i+2], 16) for i in (0,2,4))
 
 def _rgb_to_hex(rgb):
+    """
+    Convert a color from rgb format to hexadecimal format
+    :param rgb: a list of rgb components ( [r,g,b] )
+    :return: a hexadecimal string ( "#XXXXXX" )
+    """
     t = tuple(rgb)
     return "#%0.2X%0.2X%0.2X" % t
 
 def _random_rgb():
     return random.choices(range(0,255),k=3)
 
-def make_gradient(color1, color2, steps):
+def make_gradient(start_color, end_color, steps):
+    """
+    Generate a gradient from start_color to end_color
+    :param start_color: the first color of the gradient (list of [r,g,b])
+    :param end_color: the last color of the gradient (list of [r,g,b])
+    :param steps: the number of colors in the final list
+    :return: a list of colors (hex strings)
+    """
     if steps < 2:
         return None
-    colors = [_rgb_to_hex(color1)]
+    colors = [_rgb_to_hex(start_color)]
     for n in range(1,steps-1):
-        color = [int(color1[i] + (n/steps)*(color2[i]-color1[i])) for i in range(3)]
+        color = [int(start_color[i] + (n / steps) * (end_color[i] - start_color[i])) for i in range(3)]
         colors.append(_rgb_to_hex(color))
-    colors.append(_rgb_to_hex(color2))
+    colors.append(_rgb_to_hex(end_color))
     return colors
 
 class CozzleApp(tk.Frame):
@@ -49,6 +66,9 @@ class CozzleApp(tk.Frame):
         self.canvas.pack()
 
     def reset(self):
+        """
+        Clear the canvas and draw a new gradient list
+        """
         g = make_gradient(_random_rgb(), _random_rgb(), gradient_steps)
         # clear canvas
         self.canvas.delete("all")
@@ -71,6 +91,8 @@ class CozzleApp(tk.Frame):
 
     # https://stackoverflow.com/a/38256215
     def select_and_swap(self, event):
+        """
+        """
         r_id = self.canvas.find_closest(event.x, event.y)[0] # returns a tuple of length 1 so get the first element
         if "fixed" in self.canvas.gettags(r_id):
             return
@@ -85,15 +107,18 @@ class CozzleApp(tk.Frame):
             self.selected_for_move = None
 
     def renew_gradient(self, event):
+        """
+        Respond to the renew_gradient event
+        """
         print("Drawing a new gradient")
         self.reset()
 
 def main():
-
+    # create the base window
     window = tk.Tk()
+    # create the app
     CozzleApp(window).pack()
-
-
+    # run the actual app
     window.mainloop()
 
 if __name__=='__main__':
