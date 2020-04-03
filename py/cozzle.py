@@ -52,7 +52,7 @@ class CozzleApp(tk.Frame):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
 
-        self.ordered_pieces = []
+        self.ordered_pieces = dict() # expected color for each piece_id
         self.canvas = tk.Canvas(self, width=window_width, height=window_height)
         self.selected_for_move = None
 
@@ -65,16 +65,31 @@ class CozzleApp(tk.Frame):
         self.focus_set()
         self.canvas.pack()
 
+    def is_solved(self):
+        # check if each piece has the right color ( self.ordered_pieces )
+        # could do with all()
+        pieces = self.canvas.find_withtag('color_piece')
+        for p_id in pieces:
+            col = self.canvas.itemcget(p_id, "fill")
+            if self.ordered_pieces[p_id] != col:
+                return False
+        return True
+
     def reset(self):
         """
         Clear the canvas and draw a new gradient list
         """
         g = make_gradient(_random_rgb(), _random_rgb(), gradient_steps)
+        # randomize colors but keep first and last in place
+        randomized_g = g[1:-1]
+        random.shuffle(randomized_g)
+        randomized_g.insert(0, g[0])
+        randomized_g.append(g[-1])
         # clear canvas
         self.canvas.delete("all")
         # draw pieces on canvas with colors from g, the generated gradient
         for s in range(gradient_steps):
-            col = g[s]
+            col = randomized_g[s]
 
             # make items movable except the first and the last
             tag = 'movable'
@@ -87,7 +102,7 @@ class CozzleApp(tk.Frame):
                                                 fill=col, tags=tags)
 
             # store pieces ids in order
-            self.ordered_pieces.append(r_id)
+            self.ordered_pieces[r_id] = g[s]
 
     # https://stackoverflow.com/a/38256215
     def select_and_swap(self, event):
@@ -105,6 +120,9 @@ class CozzleApp(tk.Frame):
             self.canvas.itemconfigure(r_id, fill=col1, outline=col1)
             self.canvas.itemconfigure(r_id1, fill=col, outline=col)
             self.selected_for_move = None
+            if self.is_solved():
+                print("Solved !")
+                self.reset()
 
     def renew_gradient(self, event):
         """
