@@ -1,0 +1,20 @@
+[package]
+name = "cozzle"
+version = "0.1.0"
+authors = ["VJean <jean@vintache.eu>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+conrod_core = "0.70"
+conrod_derive = "0.70"
+conrod_glium = "0.70"
+conrod_winit = "0.70"
+glium = "0.24"
+find_folder = "0.3.0"
+image = "0.22"
+petgraph = "0.4"
+rand = "0.7"
+winit = "0.19"
+
